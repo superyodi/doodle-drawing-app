@@ -5,6 +5,7 @@ import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.database.Cursor
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -19,6 +20,7 @@ import android.widget.ImageView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.example.doodlebot.retrofit.RetrofitManager
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 import java.io.IOException
@@ -31,11 +33,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var imageView : ImageView
     private lateinit var btnCamera: Button
     private lateinit var btnGallery: Button
+    private lateinit var btnSend: Button
 
     val REQUEST_IMAGE_CAPTURE = 1
     val REQUEST_GALLERY_TAKE = 2
 
+    val TAG: String = "로그"
+
     lateinit var currentPhotoPath: String
+    lateinit var uploadedImg: File
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +51,7 @@ class MainActivity : AppCompatActivity() {
         imageView = findViewById(R.id.imageView)
         btnCamera = findViewById(R.id.btnCamera)
         btnGallery = findViewById(R.id.btnGallery)
+        btnSend = findViewById(R.id.btnSend)
 
         btnCamera.setOnClickListener {
             if(checkPermission()) {
@@ -62,6 +69,11 @@ class MainActivity : AppCompatActivity() {
             } else {
                 requestPermission()
             }
+        }
+
+        btnSend.setOnClickListener {
+            Log.d(TAG, "GET 메소드 호출")
+            RetrofitManager.instance.getDoodleLabel(uploadedImg)
         }
     }
 
@@ -155,7 +167,11 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, REQUEST_GALLERY_TAKE)
     }
 
-//    onActivityResult에서 사진 받기
+
+
+
+
+    //    onActivityResult에서 사진 받기
     override fun onActivityResult( requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -164,12 +180,14 @@ class MainActivity : AppCompatActivity() {
                 if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
                     // 카메라에서 받은 데이터가 있을 경우
                      val file = File(currentPhotoPath)
+                    uploadedImg = file
 
                     // SDK 29이상부터 getBitmap() 사용할수없다
                     if (Build.VERSION.SDK_INT < 28) {
                         val bitmap = MediaStore.Images.Media
                             .getBitmap(contentResolver, Uri.fromFile(file))
                         imageView.setImageBitmap(bitmap)
+
                     }
                     else {
                         val decode = ImageDecoder.createSource(this.contentResolver,
@@ -182,9 +200,56 @@ class MainActivity : AppCompatActivity() {
             }
             2 -> {
                 if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_GALLERY_TAKE) {
+
+
                     imageView.setImageURI(data?.data)
                 }
             }
         }
     }
+
+
+//    private String getRealPathFromURI(Uri contentURI) {
+//
+//
+//
+//        String result;
+//
+//        Cursor cursor = getContentResolver().query(contentURI, null, null, null, null);
+//
+//
+//
+//        if (cursor == null) { // Source is Dropbox or other similar local file path
+//
+//            result = contentURI.getPath();
+//
+//
+//
+//        } else {
+//
+//            cursor.moveToFirst();
+//
+//            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+//
+//            result = cursor.getString(idx);
+//
+//            cursor.close();
+//
+//        }
+//
+//
+//
+//        return result;
+//
+//    }
+
+
+
+
+
+
+
+
+
 }
+
