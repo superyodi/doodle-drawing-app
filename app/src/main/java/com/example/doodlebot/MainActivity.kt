@@ -3,28 +3,28 @@ package com.example.doodlebot
 import android.Manifest.permission.CAMERA
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.database.Cursor
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Button
-import android.widget.Gallery
 import android.widget.ImageView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.example.doodlebot.retrofit.DoodleLabel
 import com.example.doodlebot.retrofit.RetrofitManager
-import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 import java.io.IOException
-import java.nio.channels.GatheringByteChannel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -37,11 +37,31 @@ class MainActivity : AppCompatActivity() {
 
     val REQUEST_IMAGE_CAPTURE = 1
     val REQUEST_GALLERY_TAKE = 2
-
     val TAG: String = "로그"
 
     lateinit var currentPhotoPath: String
     lateinit var uploadedImg: File
+
+    var label: String? = null
+    var retrofitManager: RetrofitManager = RetrofitManager()
+
+
+    val positiveButtonClick = { dialog: DialogInterface, which: Int ->
+        // 여기서 DoodleActivity 호출
+
+        val intent = Intent(this, DoodleActivity::class.java).apply {
+            putExtra("label",label)
+        }
+        startActivity(intent)
+    }
+    val negativeButtonClick = { dialog: DialogInterface, which: Int ->
+        Toast.makeText(applicationContext,
+            android.R.string.no, Toast.LENGTH_SHORT).show()
+    }
+    val neutralButtonClick = { dialog: DialogInterface, which: Int ->
+        Toast.makeText(applicationContext,
+            "Maybe", Toast.LENGTH_SHORT).show()
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,11 +91,54 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+//                retrofitManager.getDoodleImage(label, index.toString()) {
+//            val bitmap: Bitmap?
+//            bitmap = if (it != null) it else {
+//                // create empty bitmap
+//                val w = 1
+//                val h = 1
+//                val conf = Bitmap.Config.ARGB_8888
+//                Bitmap.createBitmap(w, h, conf)
+//            }
+//
+//            Looper.getMainLooper().run {
+//                imageView.setImageBitmap(bitmap!!)
+//            }
+//        }
+
         btnSend.setOnClickListener {
-            Log.d(TAG, "GET 메소드 호출")
-            RetrofitManager.instance.getDoodleLabel(uploadedImg)
+            retrofitManager.getDoodleLabel(uploadedImg) {
+                label = it
+                label?.let {
+                    checkLabelDialog(label!!)
+                } ?:  run {
+                    // label이 null일때, yoloLabel이 null인 경우니까 yolo가 객체검출을 실패했을 상황
+                    Toast.makeText(applicationContext,
+                        "사진에서 사물검출을 실패했습니다. 다른 사진을 입력하세요", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
+
+    // 사용자에게 label이 true인지 확인하는 Dialog Message
+    private fun checkLabelDialog(label: String){
+
+        val builder = AlertDialog.Builder(this)
+
+        with(builder)
+        {
+            setTitle("사물검출 확인")
+            setMessage("이 사진은 [${label}]이 맞습니까?")
+            setPositiveButton("OK", DialogInterface.OnClickListener(function = positiveButtonClick))
+            setNegativeButton(android.R.string.no, negativeButtonClick)
+//            setNeutralButton("Maybe", neutralButtonClick)
+            show()
+        }
+
+    }
+
+
+
 
 //    카메라 권한 요청 -> 사용자에게 권한요청하는 메세지가 보여지고 예 || 아니오 선택
     private fun requestPermission() {
@@ -180,13 +243,16 @@ class MainActivity : AppCompatActivity() {
                 if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
                     // 카메라에서 받은 데이터가 있을 경우
                      val file = File(currentPhotoPath)
+                    print(currentPhotoPath)
                     uploadedImg = file
+
 
                     // SDK 29이상부터 getBitmap() 사용할수없다
                     if (Build.VERSION.SDK_INT < 28) {
                         val bitmap = MediaStore.Images.Media
                             .getBitmap(contentResolver, Uri.fromFile(file))
                         imageView.setImageBitmap(bitmap)
+                        label = ""
 
                     }
                     else {
@@ -194,6 +260,7 @@ class MainActivity : AppCompatActivity() {
                             Uri.fromFile(file))
                         val bitmap = ImageDecoder.decodeBitmap(decode)
                         imageView.setImageBitmap(bitmap)
+                        label = ""
 
                     }
                 }

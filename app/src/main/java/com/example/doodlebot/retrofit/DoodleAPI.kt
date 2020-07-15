@@ -1,23 +1,14 @@
 package com.example.doodlebot.retrofit
 
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Multipart
-import retrofit2.http.POST
-import retrofit2.http.Part
+import retrofit2.http.*
 
 
 interface DoodleAPI {
     @GET("/test/")
     fun getTestData() : Call<DoodleLabel>
-
-//    @GET("/inspect/")
-//    fun getDoodleData(
-//        @Query("success") success: Boolean,
-//        @Query("label") label: String
-//    ) : Call<JsonElement>
 
     @Multipart
     @POST("/inspect/")
@@ -25,10 +16,22 @@ interface DoodleAPI {
         @Part image: MultipartBody.Part?
     ): Call<DoodleLabel?>
 
+    @GET("/doodle/")
+    fun getDoodleImage(
+        @Query("label") label: String,
+        @Query("index") index: String
+    ): Call<ResponseBody>
 
-//    @Multipart
-//    @POST("/uploadFile")
-//    fun uploadPhoto(@Part("file\"; filename=\"photo.jpg\" ") photo: RequestBody?): Call<DoodleLabel?>?
-//
+    @GET("/draw/")
+    fun sendDoodleIndex(
+        @Query("label") label: String,
+        @Query("index") index: String
+    ): Call<Void>
 
+
+
+//    request: 인덱스, 라벨
+//    result: 이미지(bin)
+
+//    https://stackoverflow.com/questions/25462523/retrofit-api-to-retrieve-a-png-image
 }

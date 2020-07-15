@@ -14,3 +14,12 @@ data class DoodleLabel(
 )
 
 
+//data class DoodleImage(
+//    @SerializedName("label")
+//    var label: String = "",
+//
+//    @SerializedName("index")
+//    var index: String = ""
+//)
+
+
