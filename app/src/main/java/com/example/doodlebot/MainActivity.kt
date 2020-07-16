@@ -21,7 +21,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import com.example.doodlebot.retrofit.DoodleLabel
 import com.example.doodlebot.retrofit.RetrofitManager
 import java.io.File
 import java.io.IOException
@@ -56,11 +55,7 @@ class MainActivity : AppCompatActivity() {
     }
     val negativeButtonClick = { dialog: DialogInterface, which: Int ->
         Toast.makeText(applicationContext,
-            android.R.string.no, Toast.LENGTH_SHORT).show()
-    }
-    val neutralButtonClick = { dialog: DialogInterface, which: Int ->
-        Toast.makeText(applicationContext,
-            "Maybe", Toast.LENGTH_SHORT).show()
+            "다시 한번 찍어주세요", Toast.LENGTH_SHORT).show()
     }
 
 
@@ -73,16 +68,16 @@ class MainActivity : AppCompatActivity() {
         btnGallery = findViewById(R.id.btnGallery)
         btnSend = findViewById(R.id.btnSend)
 
+        // 카메라 버튼
         btnCamera.setOnClickListener {
             if(checkPermission()) {
                 dispatchTakePictureIntent()
-                galleryAddPic()
             } else{
                 requestPermission()
             }
-
         }
 
+        //갤러리 버튼
         btnGallery.setOnClickListener {
             if(checkPermission()) {
                 openGalleryForImage()
@@ -90,21 +85,6 @@ class MainActivity : AppCompatActivity() {
                 requestPermission()
             }
         }
-
-//                retrofitManager.getDoodleImage(label, index.toString()) {
-//            val bitmap: Bitmap?
-//            bitmap = if (it != null) it else {
-//                // create empty bitmap
-//                val w = 1
-//                val h = 1
-//                val conf = Bitmap.Config.ARGB_8888
-//                Bitmap.createBitmap(w, h, conf)
-//            }
-//
-//            Looper.getMainLooper().run {
-//                imageView.setImageBitmap(bitmap!!)
-//            }
-//        }
 
         btnSend.setOnClickListener {
             retrofitManager.getDoodleLabel(uploadedImg) {
@@ -122,23 +102,17 @@ class MainActivity : AppCompatActivity() {
 
     // 사용자에게 label이 true인지 확인하는 Dialog Message
     private fun checkLabelDialog(label: String){
-
         val builder = AlertDialog.Builder(this)
 
         with(builder)
         {
             setTitle("사물검출 확인")
             setMessage("이 사진은 [${label}]이 맞습니까?")
-            setPositiveButton("OK", DialogInterface.OnClickListener(function = positiveButtonClick))
-            setNegativeButton(android.R.string.no, negativeButtonClick)
-//            setNeutralButton("Maybe", neutralButtonClick)
+            setPositiveButton("예", DialogInterface.OnClickListener(function = positiveButtonClick))
+            setNegativeButton("아니요", negativeButtonClick)
             show()
         }
-
     }
-
-
-
 
 //    카메라 권한 요청 -> 사용자에게 권한요청하는 메세지가 보여지고 예 || 아니오 선택
     private fun requestPermission() {
@@ -214,25 +188,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-//    갤러리에 사진 저장하기 (작동안함....)
-    private fun galleryAddPic() {
-        Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).also { mediaScanIntent ->
-            val f = File(currentPhotoPath)
-            mediaScanIntent.data = Uri.fromFile(f)
-            sendBroadcast(mediaScanIntent)
-        }
-    }
-
 //    갤러리에서 사진 가져오기
     private fun openGalleryForImage() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         startActivityForResult(intent, REQUEST_GALLERY_TAKE)
     }
-
-
-
-
 
     //    onActivityResult에서 사진 받기
     override fun onActivityResult( requestCode: Int, resultCode: Int, data: Intent?) {
@@ -243,7 +204,6 @@ class MainActivity : AppCompatActivity() {
                 if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
                     // 카메라에서 받은 데이터가 있을 경우
                      val file = File(currentPhotoPath)
-                    print(currentPhotoPath)
                     uploadedImg = file
 
 
@@ -260,60 +220,28 @@ class MainActivity : AppCompatActivity() {
                             Uri.fromFile(file))
                         val bitmap = ImageDecoder.decodeBitmap(decode)
                         imageView.setImageBitmap(bitmap)
-                        label = ""
-
                     }
                 }
             }
             2 -> {
-                if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_GALLERY_TAKE) {
-
-
+                if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_GALLERY_TAKE)
                     imageView.setImageURI(data?.data)
-                }
             }
         }
     }
 
 
-//    private String getRealPathFromURI(Uri contentURI) {
-//
-//
-//
-//        String result;
-//
-//        Cursor cursor = getContentResolver().query(contentURI, null, null, null, null);
-//
-//
-//
-//        if (cursor == null) { // Source is Dropbox or other similar local file path
-//
-//            result = contentURI.getPath();
-//
-//
-//
-//        } else {
-//
-//            cursor.moveToFirst();
-//
-//            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-//
-//            result = cursor.getString(idx);
-//
-//            cursor.close();
-//
-//        }
-//
-//
-//
-//        return result;
-//
-//    }
-
-
-
-
-
+    fun getRealPathFromURI(contentUri: Uri?): String? {
+        val proj = arrayOf(MediaStore.Images.Media._ID)
+        val cursor =
+            contentResolver.query(contentUri!!, proj, null, null, null)
+        cursor!!.moveToNext()
+        val path =
+            cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns._ID))
+        val uri = Uri.fromFile(File(path))
+        cursor.close()
+        return path
+    }
 
 
 
