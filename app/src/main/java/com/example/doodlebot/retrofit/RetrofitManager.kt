@@ -24,9 +24,12 @@ class RetrofitManager {
         val instance = RetrofitManager()
 
     }
-
+// 1) 에뮬레이터
 //    val httpCall: DoodleAPI? = RetrofitClient.getClient("http://10.0.2.2:5000")?.
+//    2) 주연 - 단말기
     val httpCall: DoodleAPI? = RetrofitClient.getClient("http://192.168.43.137:5000")?.
+//    3) 성재 - 단말기
+//    val httpCall: DoodleAPI? = RetrofitClient.getClient("http://192.168.43.119:5000")?.
     create(com.example.doodlebot.retrofit.DoodleAPI::class.java)
 
     fun getDoodleLabel(file: File, onComplete: (String?) -> Unit) {
