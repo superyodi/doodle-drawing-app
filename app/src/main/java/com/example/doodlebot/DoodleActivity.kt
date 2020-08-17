@@ -11,12 +11,13 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.doodlebot.retrofit.RetrofitManager
+import com.example.doodlebot.retrofit.RetrofitManager.Companion.instance
 import java.util.*
 
 
 class DoodleActivity: AppCompatActivity() {
 
-    var retrofitManager: RetrofitManager = RetrofitManager()
+//    var retrofitManager: RetrofitManager = RetrofitManager()
     // index는 0-999사이의 랜덤변수
     var index = Random().nextInt(1000)
 
@@ -53,7 +54,7 @@ class DoodleActivity: AppCompatActivity() {
         }
 
         btnChoice.setOnClickListener {
-            retrofitManager.sendDoodleIndex(label, index.toString())
+            instance.sendDoodleIndex(label, index.toString())
 
             Toast.makeText(applicationContext,
                 "낙서 선택을 완료하셨습니다. 두들 로봇을 실행해주세요", Toast.LENGTH_SHORT).show()
@@ -65,7 +66,7 @@ class DoodleActivity: AppCompatActivity() {
 
     fun ImageView.setBitmapFrom(label: String, index: Int) {
         val imageView = this
-        retrofitManager.getDoodleImage(label, index.toString()) {
+        instance.getDoodleImage(label, index.toString()) {
             val bitmap: Bitmap?
             bitmap = if (it != null) it else {
                 // create empty bitmap

@@ -22,6 +22,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.example.doodlebot.retrofit.RetrofitManager
+import com.example.doodlebot.retrofit.RetrofitManager.Companion.instance
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -42,7 +43,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var uploadedImg: File
 
     var label: String? = null
-    var retrofitManager: RetrofitManager = RetrofitManager()
+//    var retrofitManager: RetrofitManager = RetrofitManager()
 
 
     val positiveButtonClick = { dialog: DialogInterface, which: Int ->
@@ -87,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnSend.setOnClickListener {
-            retrofitManager.getDoodleLabel(uploadedImg) {
+            instance.getDoodleLabel(uploadedImg) {
                 label = it
                 label?.let {
                     checkLabelDialog(label!!)
