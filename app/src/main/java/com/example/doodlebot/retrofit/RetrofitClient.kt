@@ -24,8 +24,5 @@ object RetrofitClient {
         }
 
         return retrofitClient
-
-
-
     }
 }

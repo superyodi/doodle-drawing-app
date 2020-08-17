@@ -3,6 +3,8 @@ package com.example.doodlebot.retrofit
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import android.widget.Toast
+import com.example.doodlebot.CheckIpActivity
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -19,18 +21,42 @@ import java.util.*
 class RetrofitManager {
     val TAG: String = "로그"
 //    var yoloLabel: String? = null
+    var baseUrl: String? = null
+    var connectResult: Boolean = false
+    var httpCall: DoodleAPI? = null
+
 
     companion object {
         val instance = RetrofitManager()
+    }
+
+    fun makeHttpCall(url: String) {
+
+       httpCall = RetrofitClient.getClient(url)?.
+        create(com.example.doodlebot.retrofit.DoodleAPI::class.java)
+    }
+
+    // 연결확인 함수. CheckIPActivity에서 입력받은 IP로 연결한다.
+    fun checkConnection() {
+
+        val call = httpCall?.checkConnection()
+        call?.enqueue(object : retrofit2.Callback<Void> {
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Log.d(TAG,
+                    "RetrofitManager - checkConnection() - onFailure() called /t : ${t}")
+
+                connectResult = false
+            }
+
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                Log.d(TAG,
+                    "RetrofitManager - checkConnection() - onResponse() called /response : ${response.body()}")
+                connectResult = true
+            }
+        })
 
     }
-// 1) 에뮬레이터
-//    val httpCall: DoodleAPI? = RetrofitClient.getClient("http://10.0.2.2:5000")?.
-//    2) 주연 - 단말기
-    val httpCall: DoodleAPI? = RetrofitClient.getClient("http://192.168.43.137:5000")?.
-//    3) 성재 - 단말기
-//    val httpCall: DoodleAPI? = RetrofitClient.getClient("http://192.168.43.119:5000")?.
-    create(com.example.doodlebot.retrofit.DoodleAPI::class.java)
+
 
     fun getDoodleLabel(file: File, onComplete: (String?) -> Unit) {
 

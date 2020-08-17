@@ -7,8 +7,10 @@ import retrofit2.http.*
 
 
 interface DoodleAPI {
+
+
     @GET("/test/")
-    fun getTestData() : Call<DoodleLabel>
+    fun checkConnection() : Call<Void>
 
     @Multipart
     @POST("/inspect/")
@@ -33,5 +35,4 @@ interface DoodleAPI {
 //    request: 인덱스, 라벨
 //    result: 이미지(bin)
 
-//    https://stackoverflow.com/questions/25462523/retrofit-api-to-retrieve-a-png-image
 }
