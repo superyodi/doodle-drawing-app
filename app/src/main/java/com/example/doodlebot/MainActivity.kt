@@ -88,7 +88,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnSend.setOnClickListener {
+            val dialog = WaitingDialog.create(this@MainActivity)
+            dialog.show()
+
             instance.getDoodleLabel(uploadedImg) {
+                dialog.dismiss()
+
                 label = it
                 label?.let {
                     checkLabelDialog(label!!)
@@ -231,7 +236,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     fun getRealPathFromURI(contentUri: Uri?): String? {
         val proj = arrayOf(MediaStore.Images.Media._ID)
         val cursor =
@@ -243,9 +247,4 @@ class MainActivity : AppCompatActivity() {
         cursor.close()
         return path
     }
-
-
-
-
 }
-

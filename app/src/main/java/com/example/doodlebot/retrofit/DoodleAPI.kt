@@ -7,10 +7,8 @@ import retrofit2.http.*
 
 
 interface DoodleAPI {
-
-
     @GET("/test/")
-    fun checkConnection() : Call<Void>
+    fun checkConnection(): Call<Void>
 
     @Multipart
     @POST("/inspect/")
@@ -29,10 +27,4 @@ interface DoodleAPI {
         @Query("label") label: String,
         @Query("index") index: String
     ): Call<Void>
-
-
-
-//    request: 인덱스, 라벨
-//    result: 이미지(bin)
-
 }

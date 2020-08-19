@@ -10,7 +10,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.doodlebot.retrofit.RetrofitManager
 import com.example.doodlebot.retrofit.RetrofitManager.Companion.instance
 import java.util.*
 
@@ -54,19 +53,29 @@ class DoodleActivity: AppCompatActivity() {
         }
 
         btnChoice.setOnClickListener {
-            instance.sendDoodleIndex(label, index.toString())
+            val dialog = WaitingDialog.create(this@DoodleActivity)
+            dialog.show()
 
-            Toast.makeText(applicationContext,
-                "낙서 선택을 완료하셨습니다. 두들 로봇을 실행해주세요", Toast.LENGTH_SHORT).show()
-
+            instance.sendDoodleIndex(label, index.toString()) {
+                dialog.dismiss()
+                if (it)
+                    Toast.makeText(applicationContext,
+                        "낙서 선택을 완료하셨습니다. 두들 로봇을 실행해주세요", Toast.LENGTH_SHORT).show()
+                else
+                    Toast.makeText(applicationContext,
+                        "낙서를 선택하는 도중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            }
         }
-
-
     }
 
     fun ImageView.setBitmapFrom(label: String, index: Int) {
+        val dialog = WaitingDialog.create(this@DoodleActivity)
+        dialog.show()
+
         val imageView = this
         instance.getDoodleImage(label, index.toString()) {
+            dialog.dismiss()
+
             val bitmap: Bitmap?
             bitmap = if (it != null) it else {
                 // create empty bitmap
@@ -82,7 +91,6 @@ class DoodleActivity: AppCompatActivity() {
         }
     }
 
-
     fun imgResize(bitmap: Bitmap, x: Int, y: Int): Bitmap? {
         val output = Bitmap.createBitmap(x, y, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(output)
@@ -94,8 +102,4 @@ class DoodleActivity: AppCompatActivity() {
         canvas.drawBitmap(bitmap, src, dst, null)
         return output
     }
-
-
-
-
 }
