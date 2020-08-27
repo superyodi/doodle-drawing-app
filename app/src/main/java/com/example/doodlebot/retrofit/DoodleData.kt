@@ -3,8 +3,6 @@ package com.example.doodlebot.retrofit
 import com.google.gson.annotations.SerializedName
 
 
-
-
 data class DoodleLabel(
     @SerializedName("success")
     var success: Boolean? = false,
@@ -12,5 +10,3 @@ data class DoodleLabel(
     @SerializedName("label")
     var label: String = ""
 )
-
-
