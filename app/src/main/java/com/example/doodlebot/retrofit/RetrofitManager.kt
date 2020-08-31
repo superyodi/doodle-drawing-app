@@ -53,44 +53,19 @@ class RetrofitManager {
         })
     }
 
-
-    fun getDoodleLabel(file: File, onComplete: (String?) -> Unit) {
+    fun getObjectDetection(file: File, onComplete: (Bitmap?) -> Unit) {
         // create multipart
         val requestFile: RequestBody = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
         val body: MultipartBody.Part =
             MultipartBody.Part.createFormData("file", file.getName(), requestFile)
 
-        val call = httpCall?.getDoodleLabel(body)
-
-        call?.enqueue(object : retrofit2.Callback<DoodleLabel?> {
-            override fun onFailure(call: Call<DoodleLabel?>, t: Throwable) {
-                onComplete(null)
-                Log.d(
-                    TAG,
-                    "RetrofitManager - getDoodleLabel() - onFailure() called /t : ${t}"
-                )
-            }
-
-            override fun onResponse(call: Call<DoodleLabel?>, response: Response<DoodleLabel?>) {
-                val yoloLabel = response.body()?.label
-                onComplete(yoloLabel)
-                Log.d(
-                    TAG,
-                    "RetrofitManager - getDoodleLabel() - onResponse() called /response : ${response.body()}"
-                )
-            }
-        })
-    }
-
-    fun getDoodleImage(label: String, index: String, onComplete: (Bitmap?) -> Unit) {
-        val call = httpCall?.getDoodleImage(label, index)
-
+        val call = httpCall?.getObjectDetection(body)
         call?.enqueue(object : retrofit2.Callback<ResponseBody> {
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 onComplete(null)
                 Log.d(
                     TAG,
-                    "RetrofitManager - getDoodleImage(label, index) - onFailure() called /t : ${t}"
+                    "RetrofitManager - getObjectDetection(file) - onFailure() called /t : ${t}"
                 )
             }
 
@@ -100,31 +75,62 @@ class RetrofitManager {
 
                 Log.d(
                     TAG,
-                    "RetrofitManager - getDoodleImage() - onResponse() called /response : ${response.body()}"
+                    "RetrofitManager - getObjectDetection(file) - onResponse() called /response : ${response.body()}"
                 )
             }
         })
     }
 
-    fun sendDoodleIndex(label: String, index: String, onComplete: (Boolean) -> Unit) {
-        val call = httpCall?.sendDoodleIndex(label, index)
+    fun getDoodlesImage(file: File, onComplete: (Bitmap?) -> Unit) {
+        val requestFile: RequestBody = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
+        val body: MultipartBody.Part =
+            MultipartBody.Part.createFormData("file", file.getName(), requestFile)
+
+        val call = httpCall?.getDoodlesImage(body)
+        call?.enqueue(object : retrofit2.Callback<ResponseBody> {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                onComplete(null)
+                Log.d(
+                    TAG,
+                    "RetrofitManager - getDoodlesImage(file) - onFailure() called /t : ${t}"
+                )
+            }
+
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                val bytes = response.body()!!.bytes()
+                onComplete(BitmapFactory.decodeByteArray(bytes, 0, bytes.size))
+
+                Log.d(
+                    TAG,
+                    "RetrofitManager - getDoodlesImage() - onResponse() called /response : ${response.body()}"
+                )
+            }
+        })
+    }
+
+    fun confirmDrawDoodle(onComplete: (Boolean) -> Unit) {
+        val call = httpCall?.confirmDrawDoodle()
 
         call?.enqueue(object : retrofit2.Callback<Void> {
             override fun onFailure(call: Call<Void>, t: Throwable) {
+
                 Log.d(
                     TAG,
-                    "RetrofitManager - sendDoodleIndex(label, index) - onFailure() called /t : ${t}"
+                    "RetrofitManager - confirmDrawDoodle() - onFailure() called /t : ${t}"
                 )
                 onComplete(false)
+                TODO("Not yet implemented")
             }
 
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                TODO("Not yet implemented")
                 Log.d(
                     TAG,
-                    "RetrofitManager - sendDoodleIndex(label, index) - onResponse() called /response : ${response.body()}"
+                    "RetrofitManager - confirmDrawDoodle() - onResponse() called /response : ${response.body()}"
                 )
                 onComplete(true)
             }
+
         })
     }
 }

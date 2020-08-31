@@ -12,9 +12,15 @@ interface DoodleAPI {
 
     @Multipart
     @POST("/inspect/")
-    fun getDoodleLabel(
+    fun getObjectDetection(
         @Part image: MultipartBody.Part?
-    ): Call<DoodleLabel?>
+    ): Call<ResponseBody>
+
+    @Multipart
+    @POST("/doodles/")
+    fun getDoodlesImage(
+        @Part image: MultipartBody.Part?
+    ): Call<ResponseBody>
 
     @GET("/doodle/")
     fun getDoodleImage(
@@ -23,8 +29,5 @@ interface DoodleAPI {
     ): Call<ResponseBody>
 
     @GET("/draw/")
-    fun sendDoodleIndex(
-        @Query("label") label: String,
-        @Query("index") index: String
-    ): Call<Void>
+    fun confirmDrawDoodle(): Call<Void>
 }
