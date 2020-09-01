@@ -16,10 +16,9 @@ interface DoodleAPI {
         @Part image: MultipartBody.Part?
     ): Call<ResponseBody>
 
-    @Multipart
-    @POST("/doodles/")
+    @GET("/doodles/")
     fun getDoodlesImage(
-        @Part image: MultipartBody.Part?
+        @Query("imgPath") label: String
     ): Call<ResponseBody>
 
     @GET("/doodle/")

@@ -81,12 +81,9 @@ class RetrofitManager {
         })
     }
 
-    fun getDoodlesImage(file: File, onComplete: (Bitmap?) -> Unit) {
-        val requestFile: RequestBody = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
-        val body: MultipartBody.Part =
-            MultipartBody.Part.createFormData("file", file.getName(), requestFile)
+    fun getDoodlesImage(imgPath: String, onComplete: (Bitmap?) -> Unit) {
+        val call = httpCall?.getDoodlesImage(imgPath)
 
-        val call = httpCall?.getDoodlesImage(body)
         call?.enqueue(object : retrofit2.Callback<ResponseBody> {
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 onComplete(null)
@@ -119,11 +116,9 @@ class RetrofitManager {
                     "RetrofitManager - confirmDrawDoodle() - onFailure() called /t : ${t}"
                 )
                 onComplete(false)
-                TODO("Not yet implemented")
             }
 
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                TODO("Not yet implemented")
                 Log.d(
                     TAG,
                     "RetrofitManager - confirmDrawDoodle() - onResponse() called /response : ${response.body()}"
@@ -133,4 +128,5 @@ class RetrofitManager {
 
         })
     }
+
 }
