@@ -7,11 +7,13 @@ import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Button
@@ -21,7 +23,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import com.example.doodlebot.retrofit.RetrofitManager
 import com.example.doodlebot.retrofit.RetrofitManager.Companion.instance
 import java.io.File
 import java.io.IOException
@@ -39,24 +40,25 @@ class MainActivity : AppCompatActivity() {
     val REQUEST_GALLERY_TAKE = 2
     val TAG: String = "로그"
 
-    lateinit var currentPhotoPath: String
-    lateinit var uploadedImg: File
+    var mHandler = Handler()
 
-    var label: String? = null
-//    var retrofitManager: RetrofitManager = RetrofitManager()
+    lateinit var currentPhotoPath: String
+    lateinit var uploadedImgName: String
+    lateinit var uploadedImg: File
 
 
     val positiveButtonClick = { dialog: DialogInterface, which: Int ->
+
         // 여기서 DoodleActivity 호출
 
         val intent = Intent(this, DoodleActivity::class.java).apply {
-            putExtra("label",label)
+            putExtra("imgPath", uploadedImgName)
         }
         startActivity(intent)
     }
     val negativeButtonClick = { dialog: DialogInterface, which: Int ->
         Toast.makeText(applicationContext,
-            "다시 한번 찍어주세요", Toast.LENGTH_SHORT).show()
+            "다시 한번 촬영해주세요", Toast.LENGTH_SHORT).show()
     }
 
 
@@ -91,29 +93,37 @@ class MainActivity : AppCompatActivity() {
             val dialog = WaitingDialog.create(this@MainActivity)
             dialog.show()
 
-            instance.getDoodleLabel(uploadedImg) {
+            instance.getObjectDetection(uploadedImg) {
                 dialog.dismiss()
 
-                label = it
-                label?.let {
-                    checkLabelDialog(label!!)
-                } ?:  run {
-                    // label이 null일때, yoloLabel이 null인 경우니까 yolo가 객체검출을 실패했을 상황
-                    Toast.makeText(applicationContext,
-                        "사진에서 사물검출을 실패했습니다. 다른 사진을 입력하세요", Toast.LENGTH_SHORT).show()
+                val bitmap: Bitmap?
+                bitmap = if (it != null) it else {
+                    // create empty bitmap
+                    val w = 1
+                    val h = 1
+                    val conf = Bitmap.Config.ARGB_8888
+
+                    Bitmap.createBitmap(w, h, conf)
                 }
+                imageView.setImageBitmap(bitmap!!)
+
+                mHandler.postDelayed({
+                    // detected image 보여주고 5초 뒤에 check dialog 실행
+                    checkLabelDialog()
+                }, 5000) // 5초후
             }
         }
+
     }
 
     // 사용자에게 label이 true인지 확인하는 Dialog Message
-    private fun checkLabelDialog(label: String){
+    private fun checkLabelDialog(){
         val builder = AlertDialog.Builder(this)
 
         with(builder)
         {
-            setTitle("사물검출 확인")
-            setMessage("이 사진은 [${label}]이 맞습니까?")
+            setTitle("객체 탐지 결과 확인")
+            setMessage("검출된 객체가 실제와 일치합니까?")
             setPositiveButton("예", DialogInterface.OnClickListener(function = positiveButtonClick))
             setNegativeButton("아니요", negativeButtonClick)
             show()
@@ -184,6 +194,8 @@ class MainActivity : AppCompatActivity() {
         // 이미지파일의 이름만들기
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
         val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+
+
         return File.createTempFile(
             "JPEG_${timeStamp}_",
             ".jpg",
@@ -191,6 +203,7 @@ class MainActivity : AppCompatActivity() {
         ).apply {
             // Save a file: path for use with ACTION_VIEW intents
             currentPhotoPath = absolutePath
+            uploadedImgName = currentPhotoPath.replace(storageDir.toString()+"/", "")
         }
     }
 
@@ -218,7 +231,6 @@ class MainActivity : AppCompatActivity() {
                         val bitmap = MediaStore.Images.Media
                             .getBitmap(contentResolver, Uri.fromFile(file))
                         imageView.setImageBitmap(bitmap)
-                        label = ""
 
                     }
                     else {
@@ -236,15 +248,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun getRealPathFromURI(contentUri: Uri?): String? {
-        val proj = arrayOf(MediaStore.Images.Media._ID)
-        val cursor =
-            contentResolver.query(contentUri!!, proj, null, null, null)
-        cursor!!.moveToNext()
-        val path =
-            cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns._ID))
-        val uri = Uri.fromFile(File(path))
-        cursor.close()
-        return path
-    }
+
+//    fun getRealPathFromURI(contentUri: Uri?): String? {
+//        val proj = arrayOf(MediaStore.Images.Media._ID)
+//        val cursor =
+//            contentResolver.query(contentUri!!, proj, null, null, null)
+//        cursor!!.moveToNext()
+//        val path =
+//            cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns._ID))
+//        val uri = Uri.fromFile(File(path))
+//        cursor.close()
+//        return path
+//    }
 }

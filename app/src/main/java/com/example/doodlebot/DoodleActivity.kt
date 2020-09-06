@@ -16,13 +16,9 @@ import java.util.*
 
 class DoodleActivity: AppCompatActivity() {
 
-//    var retrofitManager: RetrofitManager = RetrofitManager()
-    // index는 0-999사이의 랜덤변수
-    var index = Random().nextInt(1000)
 
     val TAG: String = "로그"
 
-    private lateinit var label: String
     private lateinit var imageView : ImageView
     private lateinit var btnChoice: Button
     private lateinit var btnNext: Button
@@ -39,24 +35,22 @@ class DoodleActivity: AppCompatActivity() {
         textView = findViewById(R.id.textView)
 
         val intent = intent
-        val label = intent.getStringExtra("label")
+        val imgPath = intent.getStringExtra("imgPath")
 
-        textView.setText(label)
 
         // onCreate하면서 doodle dataset 받아다가 imageview에 표시
-        imageView?.setBitmapFrom(label, index)
+        imageView?.setBitmapFrom(imgPath)
 
         btnNext.setOnClickListener{
             // index값을 랜덤으로 다시 돌려서 dataset을 다시 받아온다.
-            index = Random().nextInt(1000)
-            imageView?.setBitmapFrom(label, index)
+            imageView?.setBitmapFrom(imgPath)
         }
 
         btnChoice.setOnClickListener {
             val dialog = WaitingDialog.create(this@DoodleActivity)
             dialog.show()
 
-            instance.sendDoodleIndex(label, index.toString()) {
+            instance.confirmDrawDoodle() {
                 dialog.dismiss()
                 if (it)
                     Toast.makeText(applicationContext,
@@ -68,12 +62,12 @@ class DoodleActivity: AppCompatActivity() {
         }
     }
 
-    fun ImageView.setBitmapFrom(label: String, index: Int) {
+    fun ImageView.setBitmapFrom(imgPath: String) {
         val dialog = WaitingDialog.create(this@DoodleActivity)
         dialog.show()
 
         val imageView = this
-        instance.getDoodleImage(label, index.toString()) {
+        instance.getDoodlesImage(imgPath) {
             dialog.dismiss()
 
             val bitmap: Bitmap?
