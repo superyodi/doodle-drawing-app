@@ -43,19 +43,26 @@
             android:text="카메라" />
 
         <Button
+            android:id="@+id/btnGallery"
+            android:layout_width="300dp"
+            android:layout_height="44dp"
+            android:layout_gravity="center_horizontal"
+            android:background="#FFBB00"
+            android:layout_marginBottom="10dp"
+            android:text="갤러리" />
+
+        <Button
             android:id="@+id/btnSend"
             android:layout_width="300dp"
             android:layout_height="44dp"
             android:layout_gravity="center_horizontal"
             android:background="#FFBB00"
+            android:layout_marginBottom="10dp"
             android:text="이미지 전송" />
 
-        <Button
-            android:id="@+id/btnGallery"
-            android:layout_width="117dp"
-            android:layout_height="23dp"
-            android:text="갤러리"
-            android:visibility="invisible" />
+
+
+
 
     </LinearLayout>
 </ScrollView>

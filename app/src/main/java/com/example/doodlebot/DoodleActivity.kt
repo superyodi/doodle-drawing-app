@@ -17,7 +17,7 @@ import java.util.*
 class DoodleActivity: AppCompatActivity() {
 
 
-    val TAG: String = "로그"
+    val TAG: String = "DoodleActivity"
 
     private lateinit var imageView : ImageView
     private lateinit var btnChoice: Button
@@ -96,4 +96,6 @@ class DoodleActivity: AppCompatActivity() {
         canvas.drawBitmap(bitmap, src, dst, null)
         return output
     }
+
+
 }
